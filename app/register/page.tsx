@@ -3,14 +3,15 @@
 import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { supabase } from "@/lib/supabase";
+import type SignatureCanvasType from "react-signature-canvas";
 
-const SignatureCanvas = dynamic(
+const SignatureCanvas = dynamic<React.ComponentProps<typeof SignatureCanvasType>>(
   () => import("react-signature-canvas").then((mod) => mod.default),
   { ssr: false }
 );
 
 export default function RegisterPage() {
-  const sigRef = useRef<any>(null);
+  const sigRef = useRef<SignatureCanvasType>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -58,18 +59,13 @@ export default function RegisterPage() {
     setSubmitting(true);
 
     try {
-      console.log("Starting submission...");
-
       const photoUrl = await uploadToCloudinary(photoFile);
-      console.log("Photo uploaded:", photoUrl);
 
-      const clientSigDataUrl = sigRef.current.toDataURL("image/png");
+      const clientSigDataUrl = sigRef.current!.toDataURL("image/png");
       const clientSigBlob = await (await fetch(clientSigDataUrl)).blob();
       const clientSigFile = new File([clientSigBlob], "client-signature.png", { type: "image/png" });
       const clientSignatureUrl = await uploadToCloudinary(clientSigFile);
-      console.log("Signature uploaded:", clientSignatureUrl);
 
-      console.log("Inserting into Supabase...");
       const { data, error: dbError } = await supabase
         .from("registrations")
         .insert({
@@ -87,8 +83,6 @@ export default function RegisterPage() {
         .select()
         .single();
 
-      console.log("Supabase result:", data, dbError);
-
       if (dbError) throw new Error(dbError.message);
 
       await fetch("/api/notify", {
@@ -99,7 +93,6 @@ export default function RegisterPage() {
 
       setSubmitted(true);
     } catch (err: unknown) {
-      console.error("FULL ERROR:", err);
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setSubmitting(false);

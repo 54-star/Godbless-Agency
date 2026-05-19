@@ -4,15 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { supabase } from "@/lib/supabase";
+import type SignatureCanvasType from "react-signature-canvas";
 
-const SignatureCanvas = dynamic(
+const SignatureCanvas = dynamic<React.ComponentProps<typeof SignatureCanvasType>>(
   () => import("react-signature-canvas").then((mod) => mod.default),
   { ssr: false }
 );
 
 export default function CountersignPage() {
   const { id } = useParams();
-  const sigRef = useRef<any>(null);
+  const sigRef = useRef<SignatureCanvasType>(null);
 
   const [registration, setRegistration] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -50,14 +51,15 @@ export default function CountersignPage() {
     const uploaded = await res.json();
     return uploaded.secure_url;
   }
-async function handleSign() {
+
+  async function handleSign() {
     setError(null);
     if (sigRef.current?.isEmpty()) return setError("Please provide your signature.");
 
     setSubmitting(true);
 
     try {
-      const agentSigDataUrl = sigRef.current.toDataURL("image/png");
+      const agentSigDataUrl = sigRef.current!.toDataURL("image/png");
       const agentSigBlob = await (await fetch(agentSigDataUrl)).blob();
       const agentSigFile = new File([agentSigBlob], "agent-signature.png", { type: "image/png" });
       const agentSignatureUrl = await uploadToCloudinary(agentSigFile);
@@ -69,7 +71,7 @@ async function handleSign() {
 
       if (updateError) throw new Error(updateError.message);
 
-      // Send final email to agent and client
+      // Send final email to agent with all details
       await fetch("https://formspree.io/f/xojbqzqp", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -88,7 +90,7 @@ async function handleSign() {
         }),
       });
 
-      // Email the client too
+      // Send confirmation email to client
       await fetch("https://formspree.io/f/xojbqzqp", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -161,7 +163,6 @@ async function handleSign() {
           <p className="text-zinc-500 text-sm">Review the registration details below and add your signature.</p>
         </div>
 
-        {/* Registration Details */}
         <div className="bg-zinc-900 rounded-2xl p-6 space-y-4 border border-zinc-800">
           <div className="flex items-center gap-4">
             {registration.photo_url && (
@@ -204,7 +205,6 @@ async function handleSign() {
           )}
         </div>
 
-        {/* Agent Signature */}
         <div className="space-y-3">
           <h3 className="text-xs font-semibold uppercase tracking-widest text-amber-400">Your Signature</h3>
           <div className="rounded-xl overflow-hidden border border-zinc-700 bg-white">
