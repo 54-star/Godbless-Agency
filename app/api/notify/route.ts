@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
 
   const countersignUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/countersign/${id}`;
 
-  const res = await fetch(`https://formspree.io/f/xojbqzqp`, {
+  const res = await fetch(`https://formspree.io/f/mdajkydz`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({
