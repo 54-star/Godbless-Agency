@@ -5,8 +5,7 @@ import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { supabase } from "@/lib/supabase";
 import type SignatureCanvasType from "react-signature-canvas";
-
-const SignatureCanvas = dynamic<React.ComponentProps<typeof SignatureCanvasType>>(
+const SignatureCanvas: any = dynamic(
   () => import("react-signature-canvas").then((mod) => mod.default),
   { ssr: false }
 );

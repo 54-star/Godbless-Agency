@@ -3,15 +3,14 @@
 import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { supabase } from "@/lib/supabase";
-import type SignatureCanvasType from "react-signature-canvas";
-
-const SignatureCanvas = dynamic<React.ComponentProps<typeof SignatureCanvasType>>(
+import SignatureCanvasPkg from "react-signature-canvas";
+const SignatureCanvas: any = dynamic(
   () => import("react-signature-canvas").then((mod) => mod.default),
   { ssr: false }
 );
 
 export default function RegisterPage() {
-  const sigRef = useRef<SignatureCanvasType>(null);
+  const sigRef = useRef<any>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
