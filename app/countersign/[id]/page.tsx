@@ -90,7 +90,7 @@ export default function CountersignPage() {
       });
 
       // Send confirmation email to client
-      await fetch("https://formspree.io/f/xojbqzqp", {
+      await fetch("https://formspree.io/f/mdajkydz", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
